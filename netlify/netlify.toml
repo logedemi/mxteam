@@ -1,22 +1,43 @@
 [build]
-  publish = "public"  # Ganti dengan "dist" jika folder Anda bernama dist
-  functions = "netlify/functions"
-
-[dev]
+  command = "echo 'No build step required'"
   publish = "public"
   functions = "netlify/functions"
 
-# Redirect semua ke index.html untuk SPA
+[dev]
+  command = "echo 'No build step required'"
+  publish = "public"
+  functions = "netlify/functions"
+  targetPort = 8888
+
+# Single Page App - semua route ke index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# API endpoints
+# API redirects
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/api/generate-email"
+  to = "/.netlify/functions/generate-email"
   status = 200
+
+[[redirects]]
+  from = "/api/inbox"
+  to = "/.netlify/functions/inbox"
+  status = 200
+
+[[redirects]]
+  from = "/api/cleanup"
+  to = "/.netlify/functions/cleanup"
+  status = 200
+
+# Handle CORS untuk API
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
 
 [functions]
   node_bundle = true
