@@ -7,26 +7,16 @@
   functions = "netlify/functions"
   targetPort = 8888
 
-# Single Page App - semua route ke index.html
+# Single Page App
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# API endpoints
+# API redirects - GUNAKAN PATTERN YANG LEBIH LUAS
 [[redirects]]
-  from = "/api/generate-email"
-  to = "/.netlify/functions/generate-email"
-  status = 200
-
-[[redirects]]
-  from = "/api/inbox"
-  to = "/.netlify/functions/inbox"
-  status = 200
-
-[[redirects]]
-  from = "/api/cleanup"
-  to = "/.netlify/functions/cleanup"
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
   status = 200
 
 # CORS headers untuk API
@@ -34,8 +24,8 @@
   for = "/api/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Headers = "Content-Type"
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, OPTIONS"
 
 [functions]
   node_bundle = true
