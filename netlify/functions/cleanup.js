@@ -1,32 +1,51 @@
-import { db } from './db.js';
+const { db } = require('./db.js');
 
-// Fungsi ini bisa dipanggil manual atau dijadikan scheduled function
-export const handler = async (event, context) => {
+exports.handler = async function(event, context) {
+  // CORS headers
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Content-Type': 'application/json'
+  };
+
+  // Handle preflight
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
+  }
+
   try {
+    // Run cleanup
     const deletedCount = db.cleanup();
-    
+    const stats = db.getStats();
+
+    const response = {
+      success: true,
+      action: 'cleanup',
+      deleted_emails: deletedCount,
+      timestamp: new Date().toISOString(),
+      current_stats: stats,
+      message: deletedCount > 0 
+        ? `Cleaned up ${deletedCount} expired emails`
+        : 'No expired emails to clean up'
+    };
+
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        message: `Cleanup berhasil. ${deletedCount} email dihapus.`,
-        deleted_count: deletedCount,
-        timestamp: new Date().toISOString()
-      })
+      headers,
+      body: JSON.stringify(response, null, 2)
     };
-    
+
   } catch (error) {
+    console.error('Cleanup error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
-        success: false, 
-        error: error.message 
-      })
+      headers,
+      body: JSON.stringify({
+        success: false,
+        error: 'Cleanup failed',
+        message: error.message
+      }, null, 2)
     };
   }
 };
-
-// Untuk scheduled cleanup di Netlify, tambahkan di netlify.toml:
-// [[functions.schedule]]
-//   path = "/.netlify/functions/cleanup"
-//   cron = "0 */6 * * *"  // Setiap 6 jam
