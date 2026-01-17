@@ -1,27 +1,22 @@
-// Database sederhana di memory (reset setiap deploy)
-// Untuk production, ganti dengan Netlify KV atau FaunaDB
+// Simple in-memory database
+const emails = new Map();
 
-const emails = new Map(); // email -> { createdAt, messages: [] }
-
-export const db = {
-  // Create email
+const db = {
   createEmail(email) {
     const emailData = {
       email,
       createdAt: Date.now(),
       messages: [],
-      expiresAt: Date.now() + 24 * 60 * 60 * 1000 // 24 jam
+      expiresAt: Date.now() + 24 * 60 * 60 * 1000
     };
     emails.set(email, emailData);
     return emailData;
   },
 
-  // Get email
   getEmail(email) {
     return emails.get(email);
   },
 
-  // Add message to email
   addMessage(email, message) {
     const emailData = emails.get(email);
     if (emailData) {
@@ -33,12 +28,10 @@ export const db = {
     }
   },
 
-  // Get all emails
   getAllEmails() {
     return Array.from(emails.values());
   },
 
-  // Delete expired emails
   cleanup() {
     const now = Date.now();
     let deletedCount = 0;
@@ -51,15 +44,7 @@ export const db = {
     }
     
     return deletedCount;
-  },
-
-  // Mark message as read
-  markAsRead(email, messageIndex) {
-    const emailData = emails.get(email);
-    if (emailData && emailData.messages[messageIndex]) {
-      emailData.messages[messageIndex].read = true;
-      return true;
-    }
-    return false;
   }
 };
+
+module.exports = { db };  // CommonJS export untuk Netlify
