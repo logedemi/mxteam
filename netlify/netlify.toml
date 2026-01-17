@@ -1,39 +1,22 @@
 [build]
+  publish = "public"  # Ganti dengan "dist" jika folder Anda bernama dist
+  functions = "netlify/functions"
+
+[dev]
   publish = "public"
-  functions = "functions"
-  command = "npm run build"
+  functions = "netlify/functions"
 
-[build.environment]
-  NODE_VERSION = "18"
-
-[functions]
-  node_bundler = "esbuild"
-  external_node_modules = ["crypto", "node-fetch"]
-
-# Redirect rules for SPA
+# Redirect semua ke index.html untuk SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# API routes
+# API endpoints
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# CORS headers for API
-[[headers]]
-  for = "/.netlify/functions/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization, x-api-key"
-
-# Security headers for frontend
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+[functions]
+  node_bundle = true
