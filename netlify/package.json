@@ -1,0 +1,20 @@
+{
+  "name": "temp-email-service",
+  "version": "1.0.0",
+  "description": "Temporary Email Service with Netlify Functions",
+  "main": "index.js",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'No build required'",
+    "test": "echo 'No tests'"
+  },
+  "dependencies": {
+    "@netlify/functions": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["email", "temporary", "disposable"],
+  "author": "Your Name",
+  "license": "MIT"
+}
