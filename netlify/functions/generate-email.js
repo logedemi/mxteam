@@ -1,6 +1,7 @@
-import { db } from './db.js';
+// Import database
+const { db } = require('./db.js');
 
-export const handler = async (event, context) => {
+exports.handler = async function(event, context) {
   // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -17,36 +18,22 @@ export const handler = async (event, context) => {
   try {
     const { username, domain = 'temp.yourdomain.com' } = event.queryStringParameters || {};
     
-    // Generate random username jika tidak ada
+    // Generate username
     let finalUsername;
-    if (username) {
+    if (username && username.trim() !== '') {
       finalUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
     } else {
-      finalUsername = generateRandomString(8);
+      finalUsername = Math.random().toString(36).substring(2, 10);
     }
 
     const email = `${finalUsername}@${domain}`;
     
-    // Cek apakah email sudah ada
-    const existing = db.getEmail(email);
-    if (existing) {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          success: true,
-          email: existing.email,
-          created_at: new Date(existing.createdAt).toISOString(),
-          expires_at: new Date(existing.expiresAt).toISOString(),
-          messages_count: existing.messages.length,
-          inbox_url: `${event.headers.host}/api/inbox?email=${encodeURIComponent(email)}`
-        })
-      };
+    // Create or get existing
+    let emailData = db.getEmail(email);
+    if (!emailData) {
+      emailData = db.createEmail(email);
     }
 
-    // Buat email baru
-    const emailData = db.createEmail(email);
-    
     return {
       statusCode: 200,
       headers,
@@ -56,8 +43,7 @@ export const handler = async (event, context) => {
         created_at: new Date(emailData.createdAt).toISOString(),
         expires_at: new Date(emailData.expiresAt).toISOString(),
         inbox_url: `https://${event.headers.host}/api/inbox?email=${encodeURIComponent(email)}`,
-        api_url: `https://${event.headers.host}/api/inbox?email=${encodeURIComponent(email)}`,
-        note: 'Email akan otomatis terhapus setelah 24 jam'
+        api_url: `https://${event.headers.host}/api/inbox?email=${encodeURIComponent(email)}`
       })
     };
     
@@ -72,12 +58,3 @@ export const handler = async (event, context) => {
     };
   }
 };
-
-function generateRandomString(length) {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
