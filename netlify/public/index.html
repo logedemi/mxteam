@@ -652,4 +652,32 @@ Content-Type: application/json
                     html: "<p>Halo! Ini adalah email test dari sistem email temporari.</p><p>Email ini otomatis terhapus setelah 24 jam.</p>"
                 };
                 
-               
+                const url = `/api/inbox?email=${encodeURIComponent(currentEmail)}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showNotification('Email test berhasil dikirim!');
+                    setTimeout(checkInbox, 1000);
+                } else {
+                    showNotification('Gagal mengirim: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Auto-generate email on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Optional: Auto generate random email on load
+            // generateEmail();
+        });
+    </script>
+</body>
+</html>
